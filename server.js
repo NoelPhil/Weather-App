@@ -2,16 +2,35 @@
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Enable CORS
 app.use(cors());
+
+// =============================
+// 🌐 Serve Frontend
+// =============================
+app.use(express.static(path.join(__dirname, "public")));
+
+// Catch-all route to serve index.html for SPA routing
+app.get("*", (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith("/weather") || req.path.startsWith("/city"))
+    return next();
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // =============================
 // 🌦️ WEATHER ENDPOINT
 // =============================
-// Example: /weather?lat=7.5&lon=4.5
 app.get("/weather", async (req, res) => {
   try {
     const { lat, lon } = req.query;
@@ -33,9 +52,6 @@ app.get("/weather", async (req, res) => {
 // =============================
 // 📍 CITY ENDPOINT
 // =============================
-// Supports both:
-//   - Reverse: /city?lat=7.5&lon=4.5
-//   - Forward: /city?name=Lagos
 app.get("/city", async (req, res) => {
   try {
     const { lat, lon, name } = req.query;
@@ -89,10 +105,6 @@ app.get("/city", async (req, res) => {
     console.error("❌ City API error:", err);
     res.status(500).json({ error: "Failed to fetch city data" });
   }
-});
-
-app.get("/", (req, res) => {
-  res.send("Server is working ✅");
 });
 
 // =============================
