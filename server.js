@@ -28,8 +28,8 @@ app.use(express.json());
 // Serve static files from /public
 app.use(express.static(path.join(__dirname, "public")));
 
-// Wildcard route for SPA or fallback
-app.get("/*", (req, res, next) => {
+// ✅ FIXED — Use '*' instead of '/*'
+app.get("*", (req, res, next) => {
   // Skip API routes so they don't get overridden by index.html
   if (req.path.startsWith("/weather") || req.path.startsWith("/city"))
     return next();
