@@ -1,28 +1,36 @@
-// server.js
+// =============================
+// 🌍 Imports
+// =============================
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Fix __dirname for ES modules
+// =============================
+// 🧭 Path Setup
+// =============================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Enable CORS
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// =============================
+// 🧩 Middleware
+// =============================
 app.use(cors());
+app.use(express.json());
 
 // =============================
 // 🌐 Serve Frontend
 // =============================
+// Serve static files from /public
 app.use(express.static(path.join(__dirname, "public")));
 
-// Catch-all route to serve index.html for SPA routing
-app.get("*", (req, res, next) => {
-  // Skip API routes
+// Wildcard route for SPA or fallback
+app.get("/*", (req, res, next) => {
+  // Skip API routes so they don't get overridden by index.html
   if (req.path.startsWith("/weather") || req.path.startsWith("/city"))
     return next();
   res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -110,6 +118,4 @@ app.get("/city", async (req, res) => {
 // =============================
 // 🏁 START SERVER
 // =============================
-app.listen(PORT, () =>
-  console.log(`✅ Server running at http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
